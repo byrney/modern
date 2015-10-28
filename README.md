@@ -1,5 +1,7 @@
 
-## Modern IE Vagrant Setup ##
+# Modern IE Vagrant Setup #
+
+## Get the Vagrant Box ##
 
 Clone this repo
 
@@ -19,38 +21,22 @@ Get the box  (this may take a while)
     vagrant box add modern81 'http://aka.ms/vagrant-win81-ie11'
 ```
 
+## Set up the guest ##
+
 Start the VM
 
 ```bash
     vagrant up
 ```
 
-this will fail because the box has not be set-up (see below for example of the
-error).
+the box will start in the VirtualBox GUI but vagrant will fail because the box
+has not be set-up to allow remote access (see below for example of the error).
 
-Go to the VM GUI and open a command window as admin (right click on the start
-button and select from the menu). Then
-
-```PowerShell
-powershell
-Set-ExecutionPolicy -executionpolicy remotesigned -force
-net use z: \\vboxsvr\vagrant
-. z:\vagrant_prepare.ps1
-```
-
-this should prep-the box for vagrant to be able to connect via winrm as user
-`vagrant`.
-
-Shut down the box using the VM Gui, return to your host terminal and try
-
-```bash
-vagrant up
-```
-
-If the setup has not been run you should see this:
+You should see this:
 
 ```
 > vagrant up
+
 Bringing machine 'default' up with 'virtualbox' provider...
 ==> default: Clearing any previously set forwarded ports...
 ==> default: Clearing any previously set network interfaces...
@@ -72,10 +58,33 @@ if ($?) { exit 0 } else { if($LASTEXITCODE) { exit $LASTEXITCODE } else { exit 1
 Message: Protocol wrong type for socket
 ```
 
+Go to the VM GUI and open a command window as admin (right click on the start
+button and select from the menu). Then
+
+```PowerShell
+powershell
+Set-ExecutionPolicy -executionpolicy remotesigned -force
+net use z: \\vboxsvr\vagrant
+. z:\vagrant_prepare.ps1
+```
+
+this should prep-the box for vagrant to be able to connect via winrm as user
+`vagrant`.  (Currently the prepare script has an error setting up rdp.
+Continue and the rest should be ok).
+
+## Start up with vagrant ##
+
+Shut down the box using the VM Gui, return to your host terminal and try
+
+```bash
+vagrant up
+```
+
 When the prepare script has worked you will see this:
 
 ```
 > vagrant up
+
 Bringing machine 'default' up with 'virtualbox' provider...
 ==> default: Clearing any previously set forwarded ports...
 ==> default: Clearing any previously set network interfaces...
@@ -104,3 +113,6 @@ Bringing machine 'default' up with 'virtualbox' provider...
     default: /vagrant => /Users/rob/Documents/Vagrant/modern
 
 ```
+
+Now you can edit the Vagrantfile to provision your box as usual.
+
