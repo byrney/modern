@@ -3,30 +3,39 @@
 
 Clone this repo
 
-    git clone https://github.com/byrney/modern
+```bash
+git clone https://github.com/byrney/modern
+```
 
 change to the right directory
 
+```bash
     cd modern
+```
 
 Get the box  (this may take a while)
 
+```bash
     vagrant box add modern81 'http://aka.ms/vagrant-win81-ie11'
+```
 
 Start the VM
 
+```bash
     vagrant up
+```
 
 this will fail because the box has not be set-up (see below for example of the
 error).
 
-Go to the VM GUI and open a command window as admin. Then
+Go to the VM GUI and open a command window as admin (right click on the start
+button and select from the menu). Then
 
 ```PowerShell
-    powershell
-    Set-ExecutionPolicy -executionpolicy remotesigned -force
-    net use z: \\vboxsvr\vagrant
-    . z:\vagrant_prepare.ps1
+powershell
+Set-ExecutionPolicy -executionpolicy remotesigned -force
+net use z: \\vboxsvr\vagrant
+. z:\vagrant_prepare.ps1
 ```
 
 this should prep-the box for vagrant to be able to connect via winrm as user
@@ -34,7 +43,9 @@ this should prep-the box for vagrant to be able to connect via winrm as user
 
 Shut down the box using the VM Gui, return to your host terminal and try
 
-    vagrant up
+```bash
+vagrant up
+```
 
 If the setup has not been run you should see this:
 
