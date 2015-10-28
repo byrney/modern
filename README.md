@@ -22,10 +22,12 @@ error).
 
 Go to the VM GUI and open a command window as admin. Then
 
+```PowerShell
     powershell
     Set-ExecutionPolicy -executionpolicy remotesigned -force
     net use z: \\vboxsvr\vagrant
     . z:\vagrant_prepare.ps1
+```
 
 this should prep-the box for vagrant to be able to connect via winrm as user
 `vagrant`.
