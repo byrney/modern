@@ -3,11 +3,6 @@
 
 Vagrant.configure(2) do |config|
 
-  config.vm.post_up_message = "*******************
-    Log into the box and run a powershell as admin
-        $ps> Set-ExecutionPolicy -executionpolicy remotesigned -force
-        $ps> . \\vboxsvr\vagrant\vagrant_prepare.ps1
-        "
   config.vm.box = "modern81"
   config.vm.communicator = "winrm"
   config.vm.guest = :windows   # guest detection fails: https://github.com/mitchellh/vagrant/pull/4996

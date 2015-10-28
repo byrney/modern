@@ -3,7 +3,7 @@
 
 Clone this repo
 
-    git clone <url>
+    git clone https://github.com/byrney/modern
 
 change to the right directory
 
