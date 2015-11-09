@@ -117,11 +117,11 @@ Call 'Step 7: Enable WinRM Control' {
         winrm set winrm/config '@{MaxTimeoutms="1800000"}'
         winrm set winrm/config/service '@{AllowUnencrypted="true"}'
         winrm set winrm/config/service/auth '@{Basic="true"}'
+        # make winrm start auto  (no ps command for this)
+        invoke-expression "sc.exe config winrm start=auto"
         Write-Host "WinRM has been configured and enabled." -ForegroundColor Green
     }
 
-# make winrm start auto  (no ps command for this)
-invoke-expression "sc.exe config winrm start=auto"
 
 # Step 8: Disable Windows Firewall
 Call 'Step 8: Disable Windows Firewall' {
@@ -150,6 +150,29 @@ Call 'Step 9: Create local vagrant user' {
             Write-Host "vagrant user already exists."
         }
     }
+
+Call 'Step 10: install chef client' {
+    if(test-path "c:\opscode\chef\bin\chef-client") {
+        write-host "Chef already installed"
+        return
+    }
+    $chefUrl = "https://opscode-omnibus-packages.s3.amazonaws.com/windows/2008r2/i386/chef-client-12.5.1-1-x86.msi"
+    $tempDir = $env:Temp
+    $file = Join-Path $tempDir "chef-install.msi"
+
+    # download the package
+    if(test-path $file){
+        write-host "msi already downloaded at $file"
+    } else {
+      write-host "Downloading chef MSI from $chefUrl"
+      $downloader = new-object System.Net.WebClient
+      $downloader.Proxy.Credentials=[System.Net.CredentialCache]::DefaultNetworkCredentials;
+      $downloader.DownloadFile($chefUrl, $file)
+    }
+    write-host "Installing chef msi $file"
+    & cmd /c msiexec /qn /i "$file"
+    Write-Host "Chef Client has been installed" -ForegroundColor Green
+}
 
 Write-Host "Restarting Computer." -ForegroundColor Yellow
 

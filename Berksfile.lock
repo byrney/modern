@@ -1,0 +1,15 @@
+DEPENDENCIES
+  chocolatey
+  winbase
+    path: winbase
+  windows
+
+GRAPH
+  chef_handler (1.2.0)
+  chocolatey (0.4.1)
+    windows (~> 1.31)
+  winbase (0.1.0)
+    chocolatey (>= 0.0.0)
+    windows (>= 0.0.0)
+  windows (1.38.3)
+    chef_handler (>= 0.0.0)

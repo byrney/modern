@@ -1,5 +1,40 @@
 
-# Modern IE Vagrant Setup #
+# Modern IE Vagrant Setup with Chef #
+
+1. Install Prerequisites
+2. Get the Vagrant Box for IE Modern
+3. Prepare the guest
+4. Start up and provision with chef + vagrant
+
+## Prerequisites ##
+
+### Install Virtualbox ###
+
+
+### Install vagrant on the host ###
+
+Either download it from here
+
+    https://www.vagrantup.com/downloads
+
+or use you package manager of choice
+
+### Install chef dev kit on the host ###
+
+Download from opscode
+
+    https://downloads.chef.io/chef-dk/
+
+or, again, use you package manager
+
+### Install the vagrant-berkshelf-plugin ##
+
+Once vagrant is install this can be done with 
+
+    vagrant plugin install vagrant-berkshelf
+
+on the commandline  (see   https://github.com/berkshelf/vagrant-berkshelf  for
+more details )
 
 ## Get the Vagrant Box ##
 
@@ -9,10 +44,11 @@ Clone this repo
 git clone https://github.com/byrney/modern
 ```
 
-change to the right directory
+change to the right directory and branch
 
 ```bash
     cd modern
+    git checkout chef
 ```
 
 Get the box  (this may take a while)
@@ -72,6 +108,32 @@ this should prep-the box for vagrant to be able to connect via winrm as user
 `vagrant`.  (Currently the prepare script has an error setting up rdp.
 Continue and the rest should be ok).
 
+It will also install chef-client by downloading the MSI from opscode
+
+Let it reboot so that the updates get installed.
+
+## Optionally save the prepared image ##
+
+If you plan on creating many VMs with this box then it's probably worth
+updating the box in vagrant with the prepare script and updates applied.
+
+1.  Shut down the VM
+
+    vagrant halt
+
+2.  Back on the host, Export/Package the box
+
+    vagrant package --base modern81 --out modern81.box
+
+3.  Once the box is created import it
+
+    vagrant box add --name modern81 --provider virtualbox  --force modern81.box
+
+Once imported this will be version 2 of your modern81 box. Next time vagrant
+starts it will use the new one.
+
+You can delete the `modern81.box` file now.
+
 ## Start up with vagrant ##
 
 Shut down the box using the VM Gui, return to your host terminal and try
@@ -100,13 +162,6 @@ Bringing machine 'default' up with 'virtualbox' provider...
     default: WinRM transport: plaintext
 ==> default: Machine booted and ready!
 ==> default: Checking for guest additions in VM...
-    default: The guest additions on this VM do not match the installed version of
-    default: VirtualBox! In most cases this is fine, but in rare cases it can
-    default: prevent things such as shared folders from working properly. If you see
-    default: shared folder errors, please make sure the guest additions within the
-    default: virtual machine match the version of VirtualBox you have installed on
-    default: your host and reload your VM.
-    default: 
     default: Guest Additions Version: 4.3.10
     default: VirtualBox Version: 5.0
 ==> default: Mounting shared folders...
@@ -114,5 +169,6 @@ Bringing machine 'default' up with 'virtualbox' provider...
 
 ```
 
-Now you can edit the Vagrantfile to provision your box as usual.
+The box will provision using chef-solo running the recipe in
+`winbase/recipes/default.rb`
 
