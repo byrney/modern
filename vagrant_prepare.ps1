@@ -12,7 +12,6 @@ function UserExists([string] $username)
 {
     $objOu = [ADSI]"WinNT://${env:ComputerName}"
     $localUsers = $objOu.Children | where {$_.SchemaClassName -eq 'user'}  |  % {$_.name[0].ToString().ToLower()}
-    Write-Host $localUsers
     if($localUsers -contains $username.ToLower())
     {
         return $true;
@@ -42,9 +41,10 @@ $isWinServer = IsWinServer
 Set-ExecutionPolicy -executionpolicy remotesigned -force
 
 # Step 1: Disable UAC
-Call 'Step 1: Disable UAC' {
+Call 'Step 1: Disable UAC and GPO' {
         New-ItemProperty -Path HKLM:Software\Microsoft\Windows\CurrentVersion\Policies\System -Name EnableLUA -PropertyType DWord -Value 0 -Force | Out-Null
-        Write-Host "User Access Control (UAC) has been disabled." -ForegroundColor Green
+        New-ItemProperty -Path HKLM:Software\Microsoft\Windows\CurrentVersion\Policies\System -Name DisableGPO -PropertyType DWord -Value 1 -Force | Out-Null
+        Write-Host "User Access Control (UAC) and group policy (GPO) has been disabled." -ForegroundColor Green
     }
 
 # Step 2: Disable IE ESC
@@ -101,22 +101,24 @@ Call 'Step 5: Disable Complex Passwords' {
 # Step 6: Enable Remote Desktop
 # Reference: http://social.technet.microsoft.com/Forums/windowsserver/en-US/323d6bab-e3a9-4d9d-8fa8-dc4277be1729/enable-remote-desktop-connections-with-powershell
 Call 'Step 6: Enable Remote Desktop' {
-        (Get-WmiObject Win32_TerminalServiceSetting -Namespace root\cimv2\TerminalServices).SetAllowTsConnections(1,1)
-        (Get-WmiObject -Class "Win32_TSGeneralSetting" -Namespace root\cimv2\TerminalServices -Filter "TerminalName='eDP-tcp'").SetUserAuthenticationRequired(0)
+        set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server'-name "fDenyTSConnections" -Value 0  
+        set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 1 
+        Write-Host "Remote Desktop has been enabled" -ForegroundColor Green
     }
 
 Call 'Step 6a: Private networking' {
         # set the ethernet network to be private before attempting to activate winrm
         get-netadapter | set-netconnectionprofile -NetworkCategory Private
+        Write-Host "All networks have been set to private" -ForegroundColor Green
         }
 
 # Step 7: Enable WinRM Control
 Call 'Step 7: Enable WinRM Control' {
         winrm quickconfig -q
-        winrm set winrm/config/winrs '@{MaxMemoryPerShellMB="512"}'
-        winrm set winrm/config '@{MaxTimeoutms="1800000"}'
-        winrm set winrm/config/service '@{AllowUnencrypted="true"}'
-        winrm set winrm/config/service/auth '@{Basic="true"}'
+        winrm set winrm/config/winrs '@{MaxMemoryPerShellMB="512"}' | out-null
+        winrm set winrm/config '@{MaxTimeoutms="1800000"}' | out-null
+        winrm set winrm/config/service '@{AllowUnencrypted="true"}' | out-null
+        winrm set winrm/config/service/auth '@{Basic="true"}' | out-null
         # make winrm start auto  (no ps command for this)
         invoke-expression "sc.exe config winrm start=auto"
         Write-Host "WinRM has been configured and enabled." -ForegroundColor Green
@@ -149,6 +151,12 @@ Call 'Step 9: Create local vagrant user' {
         {
             Write-Host "vagrant user already exists."
         }
+    }
+
+# Step 10: Create local vagrant user
+Call 'Step 10: Disable some bothersome services' {
+        invoke-expression "sc.exe config aelookupsvc start=disabled"
+        invoke-expression "sc.exe config pcasvc start=disabled"
     }
 
 Call 'Step 10: install chef client' {

@@ -105,8 +105,7 @@ net use z: \\vboxsvr\vagrant
 ```
 
 this should prep-the box for vagrant to be able to connect via winrm as user
-`vagrant`.  (Currently the prepare script has an error setting up rdp.
-Continue and the rest should be ok).
+`vagrant`. 
 
 It will also install chef-client by downloading the MSI from opscode
 
@@ -123,16 +122,16 @@ updating the box in vagrant with the prepare script and updates applied.
 
 2.  Back on the host, Export/Package the box
 
-    vagrant package --base modern81 --out modern81.box
+    vagrant package --base modern8 --out modern8.box
 
 3.  Once the box is created import it
 
-    vagrant box add --name modern81 --provider virtualbox  --force modern81.box
+    vagrant box add --name modern8 --provider virtualbox  --force modern8.box
 
-Once imported this will be version 2 of your modern81 box. Next time vagrant
+Once imported this will be version 2 of your modern8 box. Next time vagrant
 starts it will use the new one.
 
-You can delete the `modern81.box` file now.
+You can delete the `modern8.box` file now.
 
 ## Start up with vagrant ##
 
@@ -171,4 +170,5 @@ Bringing machine 'default' up with 'virtualbox' provider...
 
 The box will provision using chef-solo running the recipe in
 `winbase/recipes/default.rb`
+
 
